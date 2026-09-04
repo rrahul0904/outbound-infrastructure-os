@@ -24,6 +24,17 @@ class Organization(Base):
     slug: Mapped[str] = mapped_column(String(100), unique=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
+class OrganizationMember(Base):
+    __tablename__ = "organization_members"
+    __table_args__ = (UniqueConstraint("organization_id", "subject_id", name="uq_org_subject"),)
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    organization_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("organizations.id", ondelete="CASCADE"), index=True)
+    subject_id: Mapped[str] = mapped_column(String(180))
+    email: Mapped[str | None] = mapped_column(String(320), nullable=True)
+    role: Mapped[str] = mapped_column(String(32), default="member")
+    status: Mapped[str] = mapped_column(String(32), default="active")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
 class SendingDomain(Base):
     __tablename__ = "sending_domains"
     __table_args__ = (UniqueConstraint("organization_id", "domain", name="uq_org_domain"),)
@@ -51,6 +62,22 @@ class Contact(Base):
     suppression_reason: Mapped[str | None] = mapped_column(String(80), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
+class ContactList(Base):
+    __tablename__ = "contact_lists"
+    __table_args__ = (UniqueConstraint("organization_id", "name", name="uq_org_contact_list_name"),)
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    organization_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("organizations.id", ondelete="CASCADE"), index=True)
+    name: Mapped[str] = mapped_column(String(180))
+    description: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    source: Mapped[str] = mapped_column(String(64), default="manual")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+class ContactListMembership(Base):
+    __tablename__ = "contact_list_memberships"
+    list_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("contact_lists.id", ondelete="CASCADE"), primary_key=True)
+    contact_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("contacts.id", ondelete="CASCADE"), primary_key=True)
+    added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
 class Campaign(Base):
     __tablename__ = "campaigns"
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -59,6 +86,18 @@ class Campaign(Base):
     status: Mapped[str] = mapped_column(String(32), default="draft", index=True)
     policy_mode: Mapped[str] = mapped_column(String(32), default="balanced")
     daily_limit: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+class CampaignStep(Base):
+    __tablename__ = "campaign_steps"
+    __table_args__ = (UniqueConstraint("campaign_id", "position", name="uq_campaign_step_position"),)
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    campaign_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("campaigns.id", ondelete="CASCADE"), index=True)
+    position: Mapped[int] = mapped_column(Integer)
+    delay_hours: Mapped[int] = mapped_column(Integer, default=0)
+    subject_template: Mapped[str] = mapped_column(String(500))
+    body_template: Mapped[str] = mapped_column(Text)
+    format: Mapped[str] = mapped_column(String(32), default="plain_text")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 class DeliveryEvent(Base):
@@ -81,3 +120,14 @@ class DomainHealthSnapshot(Base):
     complaint_rate: Mapped[float] = mapped_column(Numeric(8, 5), default=0)
     blacklist_hits: Mapped[int] = mapped_column(Integer, default=0)
     recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    organization_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("organizations.id", ondelete="SET NULL"), nullable=True, index=True)
+    actor_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    action: Mapped[str] = mapped_column(String(128))
+    entity_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    entity_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    metadata_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
