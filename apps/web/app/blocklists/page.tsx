@@ -1,0 +1,2 @@
+import { AppShell } from "@/components/AppShell";
+export default function Page(){return <AppShell active="Blocklists"><header className="topbar"><div><p className="eyebrow">PLATFORM</p><h1>Blocklists</h1><p>Workspace and global suppression controls.</p></div></header><article className="panel placeholderPanel"><b>Foundation ready</b><p>This module is wired into the product navigation and will be connected to persisted operational data in the next implementation wave.</p></article></AppShell>}
