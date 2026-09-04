@@ -8,6 +8,8 @@ required = [
     "apps/web/app/page.tsx", "services/api/app/main.py", "services/api/app/models.py",
     "services/worker/app/tasks.py", "infra/postgres/001_init.sql",
     "docs/architecture.md", "docs/security-and-abuse.md", ".github/workflows/ci.yml",
+    "services/api/app/dependencies.py", "services/api/app/routers/contacts.py",
+    "apps/web/app/campaigns/page.tsx", "apps/web/app/contacts/page.tsx", "apps/web/app/domains/page.tsx",
 ]
 missing = [path for path in required if not (root / path).exists()]
 for package_file in [root / "package.json", root / "apps/web/package.json"]:
