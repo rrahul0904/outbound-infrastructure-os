@@ -1,0 +1,5 @@
+[project]
+name = "outbound-worker"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = ["celery[redis]>=5.4,<6", "redis>=5,<6", "pydantic-settings>=2.6,<3"]
