@@ -26,6 +26,7 @@ jobs:
         with:
           python-version: '3.13'
       - run: python -m compileall services/api/app services/worker/app
+      - run: python scripts/verify_foundation.py
 
   compose-config:
     runs-on: ubuntu-latest
