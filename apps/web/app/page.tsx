@@ -1,5 +1,5 @@
 import { Activity, AlertTriangle, ArrowRight, CheckCircle2, CircleGauge, MailCheck, Send, Server, ShieldCheck } from "lucide-react";
-import { Sidebar } from "@/components/Sidebar";
+import { AppShell } from "@/components/AppShell";
 import { MetricCard } from "@/components/MetricCard";
 
 const domains = [
@@ -17,9 +17,7 @@ const events = [
 
 export default function HomePage() {
   return (
-    <main className="appShell">
-      <Sidebar />
-      <section className="content">
+    <AppShell active="Overview">
         <header className="topbar"><div><p className="eyebrow">CONTROL PLANE / OVERVIEW</p><h1>Infrastructure overview</h1><p>Sender health, capacity and campaign operations in one place.</p></div><div className="topActions"><button className="secondaryBtn">View incidents</button><button className="primaryBtn">Add sending domain <ArrowRight size={16}/></button></div></header>
 
         <div className="notice"><ShieldCheck size={18}/><div><strong>Policy engine is protecting sender reputation.</strong><span> 1 domain was automatically throttled after a bounce-rate anomaly.</span></div><button>Review action</button></div>
@@ -48,7 +46,6 @@ export default function HomePage() {
           <article className="panel compact"><div className="panelHead"><div><h2>Reputation posture</h2><p>Cross-domain health</p></div></div><div className="score"><strong>92</strong><span>/100</span></div><div className="scoreBar"><span></span></div><p className="muted">No critical blacklist events. Complaint and unsubscribe rates remain within policy.</p></article>
           <article className="panel compact"><div className="panelHead"><div><h2>Verification</h2><p>Contact quality today</p></div></div><div className="verificationRing"><div><strong>96.7%</strong><span>usable</span></div></div><div className="miniLegend"><span><i className="dot goodDot"></i> Valid 8,942</span><span><i className="dot warnDot"></i> Risky 181</span><span><i className="dot badDot"></i> Suppressed 126</span></div></article>
         </section>
-      </section>
-    </main>
+    </AppShell>
   );
 }
