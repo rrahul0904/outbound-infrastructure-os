@@ -14,5 +14,5 @@ for package_file in [root / "package.json", root / "apps/web/package.json"]:
     json.loads(package_file.read_text())
 if missing:
     print("Missing foundation files:", *missing, sep="\n- ")
-    process.exit(1)
+    sys.exit(1)
 print(f"Foundation verification passed: {len(required)} required files present; package JSON valid.")
