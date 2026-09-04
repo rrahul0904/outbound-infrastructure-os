@@ -11,6 +11,18 @@ DO $$ BEGIN
   CREATE TYPE domain_status AS ENUM ('pending_ns','provisioning','dns_validation','warming','ready','degraded','blacklisted','paused','disabled');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+CREATE TABLE IF NOT EXISTS organization_members (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  organization_id uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  subject_id varchar(180) NOT NULL,
+  email varchar(320),
+  role varchar(32) NOT NULL DEFAULT 'member',
+  status varchar(32) NOT NULL DEFAULT 'active',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (organization_id, subject_id)
+);
+CREATE INDEX IF NOT EXISTS ix_org_members_org_role ON organization_members(organization_id, role);
+
 CREATE TABLE IF NOT EXISTS sending_domains (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
@@ -40,6 +52,23 @@ CREATE TABLE IF NOT EXISTS contacts (
 );
 CREATE INDEX IF NOT EXISTS ix_contacts_org_verification ON contacts(organization_id, verification_status);
 
+CREATE TABLE IF NOT EXISTS contact_lists (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  organization_id uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  name varchar(180) NOT NULL,
+  description varchar(500),
+  source varchar(64) NOT NULL DEFAULT 'manual',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (organization_id, name)
+);
+
+CREATE TABLE IF NOT EXISTS contact_list_memberships (
+  list_id uuid NOT NULL REFERENCES contact_lists(id) ON DELETE CASCADE,
+  contact_id uuid NOT NULL REFERENCES contacts(id) ON DELETE CASCADE,
+  added_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (list_id, contact_id)
+);
+
 CREATE TABLE IF NOT EXISTS campaigns (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
@@ -50,6 +79,18 @@ CREATE TABLE IF NOT EXISTS campaigns (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS ix_campaigns_org_status ON campaigns(organization_id, status);
+
+CREATE TABLE IF NOT EXISTS campaign_steps (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  campaign_id uuid NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+  position integer NOT NULL CHECK (position > 0),
+  delay_hours integer NOT NULL DEFAULT 0 CHECK (delay_hours >= 0),
+  subject_template varchar(500) NOT NULL,
+  body_template text NOT NULL,
+  format varchar(32) NOT NULL DEFAULT 'plain_text',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (campaign_id, position)
+);
 
 CREATE TABLE IF NOT EXISTS suppression_entries (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
