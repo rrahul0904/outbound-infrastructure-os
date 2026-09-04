@@ -1,0 +1,2 @@
+import { AppShell } from "@/components/AppShell";
+export default function Page(){return <AppShell active="Analytics"><header className="topbar"><div><p className="eyebrow">PLATFORM</p><h1>Analytics</h1><p>Delivery, reply and infrastructure performance.</p></div></header><article className="panel placeholderPanel"><b>Foundation ready</b><p>This module is wired into the product navigation and will be connected to persisted operational data in the next implementation wave.</p></article></AppShell>}
